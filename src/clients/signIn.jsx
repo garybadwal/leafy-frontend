@@ -5,18 +5,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
-import { useRef, Suspense, useState, useEffect } from "react";
+import { useRef, Suspense, useState } from "react";
 import { Canvas, useFrame, useLoader } from "@react-three/fiber";
 import { OrbitControls, Environment } from "@react-three/drei";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
-// import { signIn, useSession } from "next-auth/react";
 import { useToast } from "@/hooks/use-toast";
 import { convertToArray } from "@/lib/config";
 import { navigate } from "@/hooks/navigate";
-import { Leaf, MoveLeft } from "lucide-react";
+import { Leaf, LoaderCircle, MoveLeft } from "lucide-react";
 import { lugife } from "@/lib/config";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
+import { signInAction } from "@/lib/actions";
 
 function Plant() {
   const gltf = useLoader(GLTFLoader, "/models/monstera_deliciosa.glb");
@@ -76,25 +76,36 @@ export function UserSignInForm() {
       return;
     }
 
-    const res = await signIn("credentials", {
-      redirect: false,
-      email,
-      password,
+    const res = await signInAction({
+      email: email,
+      password: password,
     });
 
-    if (res.ok) {
+    if (res?.status == 200) {
       toast({
-        title: "Action completed successfully.",
+        title: "Success",
         description:
           "Congratulations! Your account has been created. Get started by logging in.",
       });
-      navigate("/");
+      navigate("/dashboard");
     } else {
-      const result = JSON.parse(res.error);
-      const resultData = result?.data || {};
-
-      setEmailErrors(convertToArray(resultData["email"] || []));
-      setPasswordErrors(convertToArray(resultData["password"] || []));
+      if (res?.error?.code == "invalid_credentials") {
+        toast({
+          variant: "destructive",
+          title: "Uh oh! Something went wrong.",
+          description:
+            "Oops! The email or password you entered is incorrect. Please try again.",
+        });
+        setEmailErrors(convertToArray(["This email is invalid."]));
+        setPasswordErrors(convertToArray(["This password is invalid."]));
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Uh oh! Something went wrong.",
+          description:
+            "Something went wrong while submitting your data, Please try again later!",
+        });
+      }
     }
 
     setProcessing(false);
@@ -164,7 +175,14 @@ export function UserSignInForm() {
             disabled={processing}
             onClick={handleSubmit}
           >
-            Sign In
+            {processing ? (
+              <>
+                <LoaderCircle className="h-6 w-6 animate-spin me-2" />
+                Signing in...
+              </>
+            ) : (
+              "Sign In"
+            )}
           </Button>
         </div>
         <div className="flex flex-col justify-center items-center w-full h-fit">
@@ -186,8 +204,6 @@ export function UserSignInForm() {
 }
 
 export default function Component() {
-  // const { data, status } = useSession();
-
   return (
     <main className="flex flex-row w-screen h-screen overflow-hidden">
       <div className="lg:flex flex-col justify-between items-start hidden h-full w-1/2 p-24 bg-[#E9EFEC]">

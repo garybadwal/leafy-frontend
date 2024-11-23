@@ -14,7 +14,7 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 // import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Leaf, MoveLeft } from "lucide-react";
+import { Leaf, LoaderCircle, MoveLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 function Plant() {
@@ -124,15 +124,14 @@ export function UserSignUpForm() {
     }
 
     const formData = {
-        first_name: firstName,
-        last_name: lastName,
-        email: email,
-        password: password,
-        confirm_password: confirmPassword,
+      first_name: firstName,
+      last_name: lastName,
+      email: email,
+      password: password,
     };
-
+    
     try {
-      const res = await fetch(`${API_URL}/api/user/create/`, {
+      const res = await fetch("/api/auth/sign-up", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -160,30 +159,20 @@ export function UserSignUpForm() {
         });
         const data = response?.data;
 
-        if (data?.name) {
-          setCompanyErrors(convertToArray(data?.name));
+        if (data?.first_name) {
+          setFirstNameErrors(convertToArray(data?.first_name));
         }
 
-        if (data?.user_data?.first_name) {
-          setFirstNameErrors(convertToArray(data?.user_data?.first_name));
+        if (data?.last_name) {
+          setLastNameErrors(convertToArray(data?.last_name));
         }
 
-        if (data?.user_data?.last_name) {
-          setLastNameErrors(convertToArray(data?.user_data?.last_name));
+        if (data?.email) {
+          setEmailErrors(convertToArray(data?.email));
         }
 
-        if (data?.user_data?.email) {
-          setEmailErrors(convertToArray(data?.user_data?.email));
-        }
-
-        if (data?.user_data?.password) {
-          setPasswordErrors(convertToArray(data?.user_data?.password));
-        }
-
-        if (data?.user_data?.confirm_password) {
-          setConfirmPasswordErrors(
-            convertToArray(data?.user_data?.confirm_password)
-          );
+        if (data?.password) {
+          setPasswordErrors(convertToArray(data?.password));
         }
       }
     } catch (exception) {
@@ -287,7 +276,14 @@ export function UserSignUpForm() {
             loading={processing ? "true" : "false"}
             disabled={processing}
           >
-            Sign Up
+            {processing ? (
+              <>
+                <LoaderCircle className="h-6 w-6 animate-spin me-2" />
+                Signing Up...
+              </>
+            ) : (
+              "Sign Up"
+            )}
           </Button>
         </div>
         <div className="flex flex-col justify-center items-center w-full h-fit">

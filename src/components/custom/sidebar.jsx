@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { ChartLine, Container, Fence, House, LayoutDashboard, Leaf } from "lucide-react";
+import { ChartLine, Fence, LayoutDashboard, Leaf } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -30,17 +30,20 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-// import { signOut } from "next-auth/react";
 import { navigate } from "@/hooks/navigate";
 import Link from "next/link";
 import { lugife } from "@/lib/config";
-import { Separator } from "../ui/separator";
+import { Separator } from "@/components/ui/separator";
+import { signOutAction } from "@/lib/actions";
+import { usePathname } from "next/navigation";
 
 export function LogOutDialog() {
   const handleLogout = async (e) => {
     e.preventDefault();
-    // const data = await signOut({ redirect: false, callbackUrl: "/sign-in" });
-    navigate("/sign-in");
+    const res = await signOutAction();
+    if (res?.status == 200) {
+      navigate("/sign-in");
+    }
   };
 
   return (
@@ -84,13 +87,13 @@ const NAV = [
     icon: <LayoutDashboard className="h-8 w-8" />,
     title: "Dashboard",
     value: "dashboard",
-    href: "#",
+    href: "/dashboard",
   },
   {
     icon: <Fence className="h-8 w-8" />,
     title: "My Garden",
     value: "my-garden",
-    href: "#",
+    href: "/garden",
   },
   {
     icon: <ChartLine className="h-8 w-8" />,
@@ -100,7 +103,9 @@ const NAV = [
   },
 ];
 
-export function SidebarNav({ className, value, items, ...props }) {
+export function SidebarNav({ className, items, ...props }) {
+  const pathname = usePathname();
+
   return (
     <nav
       className={cn(
@@ -115,7 +120,7 @@ export function SidebarNav({ className, value, items, ...props }) {
             key={idx}
             className={cn(
               buttonVariants({ variant: "ghost" }),
-              value === item.value
+              pathname.includes(item.href)
                 ? "hover:bg-primary bg-primary"
                 : "hover:bg-gray-100 hover:no-underline",
               "relative justify-between cursor-pointer w-full"
@@ -125,7 +130,7 @@ export function SidebarNav({ className, value, items, ...props }) {
               href={item.href}
               className={cn(
                 "flex flex-row justify-start items-center w-full gap-3 text-[1rem] font-semibold",
-                value === item.value
+                pathname.includes(item.href)
                   ? "w-full p-0 text-white"
                   : "w-full p-0 text-primary"
               )}
@@ -193,7 +198,7 @@ export default function Sidebar({ params }) {
           </CardHeader>
           <CardContent className="flex flex-col justify-center items-center px-2 pb-2 gap-3">
             <Separator />
-            <SidebarNav value={"dashboard"} items={NAV} />
+            <SidebarNav items={NAV} />
           </CardContent>
           <CardFooter className="mt-auto mb-0 flex-col gap-3 px-2 pb-2">
             <Separator />

@@ -24,3 +24,11 @@ export function convertToArray(data) {
   // If the data is not an array, wrap it in an array and convert to string
   return [String(data)];
 }
+
+export function createAPIResponse({ status, message, data = {} }) {
+  return {
+    status,
+    message,
+    data,
+  };
+}
