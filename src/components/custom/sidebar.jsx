@@ -170,7 +170,13 @@ export function UserDropDown() {
         <DropdownMenuLabel>My Account</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem>Profile</DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={() => {
+              navigate("/profile");
+            }}
+          >
+            Profile
+          </DropdownMenuItem>
         </DropdownMenuGroup>
         <LogOutDialog />
       </DropdownMenuContent>
