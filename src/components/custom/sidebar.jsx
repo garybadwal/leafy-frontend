@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { ChartLine, Container, Fence, House, LayoutDashboard, Leaf } from "lucide-react";
+import { ChartLine, Fence, LayoutDashboard, Leaf, UserRound } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -30,17 +30,21 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-// import { signOut } from "next-auth/react";
 import { navigate } from "@/hooks/navigate";
 import Link from "next/link";
 import { lugife } from "@/lib/config";
-import { Separator } from "../ui/separator";
+import { Separator } from "@/components/ui/separator";
+import { signOutAction } from "@/lib/actions";
+import { usePathname } from "next/navigation";
+import { useAuth } from "@/components/authenticated";
 
 export function LogOutDialog() {
   const handleLogout = async (e) => {
     e.preventDefault();
-    // const data = await signOut({ redirect: false, callbackUrl: "/sign-in" });
-    navigate("/sign-in");
+    const res = await signOutAction();
+    if (res?.status == 200) {
+      navigate("/sign-in");
+    }
   };
 
   return (
@@ -84,13 +88,13 @@ const NAV = [
     icon: <LayoutDashboard className="h-8 w-8" />,
     title: "Dashboard",
     value: "dashboard",
-    href: "#",
+    href: "/dashboard",
   },
   {
     icon: <Fence className="h-8 w-8" />,
     title: "My Garden",
     value: "my-garden",
-    href: "#",
+    href: "/garden",
   },
   {
     icon: <ChartLine className="h-8 w-8" />,
@@ -100,7 +104,9 @@ const NAV = [
   },
 ];
 
-export function SidebarNav({ className, value, items, ...props }) {
+export function SidebarNav({ className, items, ...props }) {
+  const pathname = usePathname();
+
   return (
     <nav
       className={cn(
@@ -115,7 +121,7 @@ export function SidebarNav({ className, value, items, ...props }) {
             key={idx}
             className={cn(
               buttonVariants({ variant: "ghost" }),
-              value === item.value
+              pathname.includes(item.href)
                 ? "hover:bg-primary bg-primary"
                 : "hover:bg-gray-100 hover:no-underline",
               "relative justify-between cursor-pointer w-full"
@@ -125,7 +131,7 @@ export function SidebarNav({ className, value, items, ...props }) {
               href={item.href}
               className={cn(
                 "flex flex-row justify-start items-center w-full gap-3 text-[1rem] font-semibold",
-                value === item.value
+                pathname.includes(item.href)
                   ? "w-full p-0 text-white"
                   : "w-full p-0 text-primary"
               )}
@@ -155,9 +161,11 @@ export function UserDropDown() {
             className={`flex flex-row items-center justify-start w-full h-full p-0 gap-2 text-[1rem] font-semibold`}
           >
             <Avatar>
-              <AvatarFallback className="text-primary">GS</AvatarFallback>
+              <AvatarFallback className="text-primary">
+                <UserRound className="h-8 w-8" />
+              </AvatarFallback>
             </Avatar>
-            <p>Gurpreet Singh</p>
+            <p>Profile</p>
           </div>
         </div>
       </DropdownMenuTrigger>
@@ -165,7 +173,13 @@ export function UserDropDown() {
         <DropdownMenuLabel>My Account</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem>Profile</DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={() => {
+              navigate("/profile");
+            }}
+          >
+            Profile
+          </DropdownMenuItem>
         </DropdownMenuGroup>
         <LogOutDialog />
       </DropdownMenuContent>
@@ -176,7 +190,7 @@ export function UserDropDown() {
 export default function Sidebar({ params }) {
   return (
     <>
-      <div className="flex flex-col justify-center items-center w-[300px] h-full">
+      <div className="hidden lg:flex flex-col justify-center items-center w-[300px] h-full">
         <Card className="flex flex-col w-full h-full shadow-none rounded-none">
           <CardHeader className="flex flex-row justify-center items-center w-full px-2">
             <div
@@ -193,7 +207,7 @@ export default function Sidebar({ params }) {
           </CardHeader>
           <CardContent className="flex flex-col justify-center items-center px-2 pb-2 gap-3">
             <Separator />
-            <SidebarNav value={"dashboard"} items={NAV} />
+            <SidebarNav items={NAV} />
           </CardContent>
           <CardFooter className="mt-auto mb-0 flex-col gap-3 px-2 pb-2">
             <Separator />

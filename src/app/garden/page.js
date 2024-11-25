@@ -1,7 +1,7 @@
 import Component from "@/clients/dashboard";
 
 export const metadata = {
-  title: 'Dashboard',
+  title: 'Garden',
 }
 
 export default function Dashboard({ params }) {
