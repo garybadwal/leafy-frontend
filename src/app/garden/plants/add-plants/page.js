@@ -1,9 +1,11 @@
-import Component from "@/clients/dashboard";
+import Component from "@/clients/add-plants";
 
-export default function Dashboard({ params }) {
+export const metadata = {
+  title: 'Add Plants',
+}
+
+export default function AddPlants() {
   return (
-    <>
-      <Component />
-    </>
-  );
+    <Component />
+  )
 }

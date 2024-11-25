@@ -89,7 +89,7 @@ export default function Component() {
   };
 
   return (
-    <div className="flex flex-col justify-start items-center w-full h-full px-24 py-5 gap-5 overflow-y-auto">
+    <div className='space-y-8'>
       <section className="flex flex-col justify-start items-start w-full bg-neutral-50 p-10 rounded-xl">
         <h1 className="text-2xl font-bold mb-2">My Profile</h1>
         <p className="text-sm text-gray-500 mb-6">

@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { navigate } from "@/hooks/navigate";
 import { useToast } from "@/hooks/use-toast";
-import { API_URL, convertToArray, lugife } from "@/lib/config";
+import { convertToArray, lugife } from "@/lib/config";
 import { useRef, Suspense, useState, useEffect } from "react";
 import { Canvas, useFrame, useLoader } from "@react-three/fiber";
 import { OrbitControls, Environment } from "@react-three/drei";

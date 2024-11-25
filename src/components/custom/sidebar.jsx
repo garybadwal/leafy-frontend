@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { ChartLine, Fence, LayoutDashboard, Leaf } from "lucide-react";
+import { ChartLine, Fence, LayoutDashboard, Leaf, UserRound } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -36,6 +36,7 @@ import { lugife } from "@/lib/config";
 import { Separator } from "@/components/ui/separator";
 import { signOutAction } from "@/lib/actions";
 import { usePathname } from "next/navigation";
+import { useAuth } from "@/components/authenticated";
 
 export function LogOutDialog() {
   const handleLogout = async (e) => {
@@ -160,9 +161,11 @@ export function UserDropDown() {
             className={`flex flex-row items-center justify-start w-full h-full p-0 gap-2 text-[1rem] font-semibold`}
           >
             <Avatar>
-              <AvatarFallback className="text-primary">GS</AvatarFallback>
+              <AvatarFallback className="text-primary">
+                <UserRound className="h-8 w-8" />
+              </AvatarFallback>
             </Avatar>
-            <p>Gurpreet Singh</p>
+            <p>Profile</p>
           </div>
         </div>
       </DropdownMenuTrigger>
@@ -187,7 +190,7 @@ export function UserDropDown() {
 export default function Sidebar({ params }) {
   return (
     <>
-      <div className="flex flex-col justify-center items-center w-[300px] h-full">
+      <div className="hidden lg:flex flex-col justify-center items-center w-[300px] h-full">
         <Card className="flex flex-col w-full h-full shadow-none rounded-none">
           <CardHeader className="flex flex-row justify-center items-center w-full px-2">
             <div

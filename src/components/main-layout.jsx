@@ -1,26 +1,33 @@
-"use client";
+'use client'
 
-import { usePathname } from "next/navigation";
-import Sidebar from "@/components/custom/sidebar";
-import Authenticated from "@/components/authenticated";
+import { AppSidebar } from "@/components/app-sidebar"
+import BreadcrumbedHeader from "@/components/header-breadcrumb"
+import {
+    SidebarInset,
+    SidebarProvider,
+} from "@/components/ui/sidebar"
+import Authenticated from "@/components/authenticated"
+import { usePathname } from "next/navigation"
 
 export default function MainLayout({ children }) {
-  const pathname = usePathname();
 
-  return (
-    <Authenticated>
-      {["/", "/sign-in", "/sign-up"].includes(pathname) ? (
-        children
-      ) : (
-        <>
-          <main className="flex flex-col lg:flex-row justify-start items-center w-screen h-screen gap-5 overflow-hidden">
-            <Sidebar />
-            <div className="flex flex-col justify-center items-center w-full h-full">
-              {children}
-            </div>
-          </main>
-        </>
-      )}
-    </Authenticated>
-  );
+    const pathname = usePathname();
+
+    return (
+        <Authenticated>
+            {["/", "/sign-in", "/sign-up"].includes(pathname) ? (
+                children
+            ) : (
+                <SidebarProvider>
+                    <AppSidebar />
+                    <SidebarInset>
+                        <BreadcrumbedHeader />
+                        <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+                            {children}
+                        </div>
+                    </SidebarInset>
+                </SidebarProvider>
+            )}
+        </Authenticated>
+    )
 }

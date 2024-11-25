@@ -1,7 +1,7 @@
 import { navigate } from "@/hooks/navigate";
 import { createClient } from "@/lib/supabase/client";
 import { usePathname } from "next/navigation";
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 
 const AuthContext = createContext({ user: null, loading: true });
 
@@ -9,28 +9,49 @@ export default function Authenticated({ children }) {
   const pathname = usePathname();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const publicRoutes = useMemo(() => ['/', '/sign-in', '/sign-up'], [])
+  const isPublicRoute = useMemo(() => publicRoutes.includes(pathname), [publicRoutes, pathname])
+
+  const handleAuthStateChange = useCallback(async (event, session) => {
+    if (event === 'SIGNED_IN') {
+      setUser(session.user)
+      if (isPublicRoute) {
+        navigate('/dashboard')
+      }
+    } else if (event === 'SIGNED_OUT') {
+      setUser(null)
+      if (!isPublicRoute) {
+        navigate('/sign-in')
+      }
+    }
+    setLoading(false)
+  }, [isPublicRoute])
 
   useEffect(() => {
-    const getUser = async () => {
-      const supabase = await createClient();
-      const { data } = await supabase.auth.getUser();
-      setUser(data?.user);
+    const supabase = createClient();
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(handleAuthStateChange)
 
-      if (!data?.user && !["/", "/sign-in", "/sign-up"].includes(pathname)) {
-        navigate("/sign-in");
-      }
-
-      if (data?.user && ["/sign-in", "/sign-up"].includes(pathname)) {
-        navigate("/dashboard");
-      }
-
-      setLoading(false);
-    };
-
-    if (loading) {
-      getUser();
+    return () => {
+      subscription.unsubscribe()
     }
-  }, [loading]);
+  }, [handleAuthStateChange]);
+
+  useEffect(() => {
+    const checkUser = async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser()
+      setUser(user)
+      setLoading(false)
+
+      if (user && isPublicRoute && pathname !== '/') {
+        navigate('/dashboard')
+      } else if (!user && !isPublicRoute) {
+        navigate('/sign-in')
+      }
+    }
+
+    checkUser()
+  }, [isPublicRoute, pathname])
 
   useEffect(() => {
     async function getLoader() {
