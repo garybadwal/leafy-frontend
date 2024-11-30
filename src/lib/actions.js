@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { createBackendClient as createClient } from "@/lib/supabase/server";
 
 export const signInAction = async (data) => {
   const { email, password } = data;

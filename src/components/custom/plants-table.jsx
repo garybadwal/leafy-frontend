@@ -70,6 +70,7 @@ import {
     useReactTable
 } from "@tanstack/react-table"
 import { cn } from "@/lib/utils"
+import { TableResponsive } from "@/components/custom/table-responsive"
 
 export const statuses = [
     {
@@ -305,7 +306,7 @@ function DataTablePagination({
     table,
 }) {
     return (
-        <div className="flex items-center justify-between px-2">
+        <div className="flex flex-col lg:flex-row gap-3 items-center justify-between px-2">
             <div className="flex-1 text-sm text-muted-foreground">
                 {table.getFilteredSelectedRowModel().rows.length} of{" "}
                 {table.getFilteredRowModel().rows.length} row(s) selected.
@@ -417,7 +418,7 @@ export default function PlantsTable({
     return (
         <div className="space-y-4">
             <DataTableToolbar table={table} />
-            <div className="rounded-md border">
+            <TableResponsive className="rounded-md border">
                 <Table>
                     <TableHeader>
                         {table.getHeaderGroups().map((headerGroup) => (
@@ -474,7 +475,7 @@ export default function PlantsTable({
                         )}
                     </TableBody>
                 </Table>
-            </div>
+            </TableResponsive>
             <DataTablePagination table={table} />
         </div>
     )
