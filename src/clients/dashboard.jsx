@@ -1,11 +1,40 @@
 'use client';
 
+import RecentPlantsTable from "@/components/custom/recent-plants-table";
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { navigate } from "@/hooks/navigate";
+import { AllPlantsListColumns } from "@/lib/config";
 import { Plus } from "lucide-react"
+import { useState, useEffect } from 'react';
 
 export default function Component() {
+    const [plants, setPlants] = useState([]);
+    const [totalPlants, setTotalPlants] = useState(0);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchPlants = async () => {
+            try {
+                const response = await fetch('/api/plants/list');
+                const data = await response.json();
+                if (data?.data) {
+                    data.data.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
+                    setPlants(data.data.slice(0, 5));
+                    setTotalPlants(data?.data?.length || 0);
+                }
+            } catch (error) {
+                console.error('Error fetching plants:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        if (isLoading) {
+            fetchPlants();
+        }
+    }, [isLoading]);
+
     return (
         <div className="grid gap-6 w-full h-full py-5">
             {/* Subscription Card */}
@@ -34,7 +63,7 @@ export default function Component() {
                     </CardHeader>
                     <CardContent>
                         <div className="flex items-baseline gap-2">
-                            <span className="text-3xl font-bold">0</span>
+                            <span className="text-3xl font-bold">{totalPlants}</span>
                             <span className="text-sm text-muted-foreground">/5</span>
                         </div>
                         <p className="mt-2 text-xs text-muted-foreground">
@@ -79,19 +108,7 @@ export default function Component() {
                     <CardDescription>Your 5 most recently added plants</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <div className="flex min-h-[300px] flex-col items-center justify-center gap-4 rounded-lg border border-dashed p-8 text-center">
-                        <div className="rounded-full bg-primary/10 p-3">
-                            <Plus className="h-6 w-6 text-primary" />
-                        </div>
-                        <div className="max-w-sm space-y-2">
-                            <h3 className="text-lg font-medium">No plants added yet</h3>
-                            <p className="text-sm text-gray-500">
-                                Get started by adding your first plant to track its growth and
-                                care needs.
-                            </p>
-                        </div>
-                        <Button onClick={() => { navigate('/garden/plants/add-plants') }}>Add Your First Plant</Button>
-                    </div>
+                    <RecentPlantsTable data={plants} columns={AllPlantsListColumns} retriving={isLoading} />
                 </CardContent>
             </Card>
         </div>

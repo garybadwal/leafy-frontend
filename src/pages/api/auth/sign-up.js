@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/api";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" }); // Ensure it's a POST request
+    return res.status(405).json(createAPIResponse({ status: 405, message: "Method not allowed" })); // Ensure it's a POST request
   }
 
   try {
