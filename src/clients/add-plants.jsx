@@ -12,8 +12,13 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { CalendarIcon, Loader2, Pencil } from 'lucide-react'
 import { format } from "date-fns"
 import { cn } from "@/lib/utils"
+import { useToast } from '@/hooks/use-toast'
+import { navigate } from '@/hooks/navigate'
+import ShowErrors from '@/components/custom/showErrors'
 
 export default function Component() {
+    const { toast } = useToast();
+
     const [plantImage, setPlantImage] = useState(null)
     const [plantImageUrl, setPlantImageUrl] = useState(null)
     const [isLoading, setIsLoading] = useState(false)
@@ -31,6 +36,9 @@ export default function Component() {
         growthStage: '',
         lastWateredDate: format(new Date(), 'yyyy-MM-dd'),
     })
+    const [plantInfoErrors, setPlantInfoErrors] = useState({});
+    const [detectDialogOpen, setDetectDialogOpen] = useState(false);
+    const [isSaving, setIsSaving] = useState(false)
 
     const handleImageChange = (e) => {
         if (e.target.files && e.target.files[0]) {
@@ -53,11 +61,16 @@ export default function Component() {
                 body: formData,
             })
 
-            const data = await response.json()
+            const result = await response.json()
             if (!response.ok) {
-                throw new Error('API request failed')
+                throw new Error(result.message || 'API request failed')
             }
-            setPlantInfo(prevInfo => ({ ...prevInfo, ...data }))
+            setPlantInfo(prevInfo => ({ ...prevInfo, ...result.data }))
+            toast({
+                title: "Action completed successfully.",
+                description: "Plant detected successfully",
+            });
+            setDetectDialogOpen(false);
         } catch (error) {
             console.error('Error:', error)
         } finally {
@@ -72,11 +85,12 @@ export default function Component() {
     const handleSubmit = async () => {
         const plantData = {
             ...plantInfo,
-            image: plantImage
+            // image: plantImage
         }
+        setIsSaving(true);
 
         try {
-            const response = await fetch('/api/plants', {
+            const response = await fetch('/api/plants/add', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -84,14 +98,32 @@ export default function Component() {
                 body: JSON.stringify(plantData),
             })
 
-            if (!response.ok) {
-                throw new Error('Failed to save plant information')
+            const result = await response.json();
+            if (response.ok) {
+                toast({
+                    title: "Action completed successfully.",
+                    description: "Plant information saved successfully",
+                });
+                navigate('/garden/plants');
             }
 
-            const result = await response.json()
-            console.log('Plant information saved:', result)
+            if (response.status === 400) {
+                toast({
+                    variant: "destructive",
+                    title: "Uh oh! Something went wrong.",
+                    description:
+                        response["message"] ||
+                        "Something went wrong while submitting your data, Please validate your data and try again!",
+                });
+                setPlantInfoErrors(result?.data || {});
+            } else {
+                console.log('Plant information not saved:', result)
+            }
+
         } catch (error) {
             console.error('Error saving plant information:', error)
+        } finally {
+            setIsSaving(false);
         }
     }
 
@@ -100,9 +132,9 @@ export default function Component() {
             <div className="flex flex-col md:flex-row justify-between items-start gap-4 w-full">
                 <div>
                     <h1 className="text-2xl font-bold">Add Plant Details</h1>
-                    <p className="text-muted-foreground">Enter information about your plant</p>
+                    <p className="text-muted-foreground text-sm">Enter information about your plant</p>
                 </div>
-                <Dialog>
+                <Dialog open={detectDialogOpen} onOpenChange={setDetectDialogOpen}>
                     <DialogTrigger asChild>
                         <Button variant="outline">Detect Plant</Button>
                     </DialogTrigger>
@@ -163,6 +195,7 @@ export default function Component() {
                                 value={plantInfo.commonName}
                                 onChange={(e) => handleInputChange('commonName', e.target.value)}
                             />
+                            <ShowErrors errors={plantInfoErrors?.commonName || []} />
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="scientificName">Scientific Name</Label>
@@ -171,6 +204,7 @@ export default function Component() {
                                 value={plantInfo.scientificName}
                                 onChange={(e) => handleInputChange('scientificName', e.target.value)}
                             />
+                            <ShowErrors errors={plantInfoErrors?.scientificName || []} />
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="dateAdded">Date Added</Label>
@@ -196,6 +230,7 @@ export default function Component() {
                                     />
                                 </PopoverContent>
                             </Popover>
+                            <ShowErrors errors={plantInfoErrors?.dateAdded || []} />
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="age">Age of Plant</Label>
@@ -208,12 +243,13 @@ export default function Component() {
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="Seedling">Seedling</SelectItem>
-                                    <SelectItem value="Young Plant (1–6 months)">Young Plant (1–6 months)</SelectItem>
+                                    <SelectItem value="Young Plant (1-6 months)">Young Plant (1-6 months)</SelectItem>
                                     <SelectItem value="Mature Plant (6+ months)">Mature Plant (6+ months)</SelectItem>
                                     <SelectItem value="Established (1+ year)">Established (1+ year)</SelectItem>
                                     <SelectItem value="Unknown">Unknown</SelectItem>
                                 </SelectContent>
                             </Select>
+                            <ShowErrors errors={plantInfoErrors?.age || []} />
                         </div>
                     </div>
                 </div>
@@ -241,6 +277,7 @@ export default function Component() {
                                     <SelectItem value="Dormant">Dormant</SelectItem>
                                 </SelectContent>
                             </Select>
+                            <ShowErrors errors={plantInfoErrors?.healthStatus || []} />
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="wateringStatus">Watering Status</Label>
@@ -259,6 +296,7 @@ export default function Component() {
                                     <SelectItem value="Moist Soil">Moist Soil</SelectItem>
                                 </SelectContent>
                             </Select>
+                            <ShowErrors errors={plantInfoErrors?.wateringStatus || []} />
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="lastWateredDate">Last Watered Date</Label>
@@ -284,6 +322,7 @@ export default function Component() {
                                     />
                                 </PopoverContent>
                             </Popover>
+                            <ShowErrors errors={plantInfoErrors?.lastWateredDate || []} />
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="lightRequirements">Light Requirements</Label>
@@ -296,12 +335,13 @@ export default function Component() {
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="Full Sun (6+ hours of direct sunlight)">Full Sun (6+ hours of direct sunlight)</SelectItem>
-                                    <SelectItem value="Partial Sun (4–6 hours of sunlight)">Partial Sun (4–6 hours of sunlight)</SelectItem>
-                                    <SelectItem value="Shade (2–4 hours of indirect sunlight)">Shade (2–4 hours of indirect sunlight)</SelectItem>
+                                    <SelectItem value="Partial Sun (4-6 hours of sunlight)">Partial Sun (4-6 hours of sunlight)</SelectItem>
+                                    <SelectItem value="Shade (2-4 hours of indirect sunlight)">Shade (2-4 hours of indirect sunlight)</SelectItem>
                                     <SelectItem value="Low Light (indoor/artificial light)">Low Light (indoor/artificial light)</SelectItem>
                                     <SelectItem value="Bright Indirect Light">Bright Indirect Light</SelectItem>
                                 </SelectContent>
                             </Select>
+                            <ShowErrors errors={plantInfoErrors?.lightRequirements || []} />
                         </div>
                     </div>
                 </div>
@@ -331,6 +371,7 @@ export default function Component() {
                                     <SelectItem value="Mixed/Custom Blend">Mixed/Custom Blend</SelectItem>
                                 </SelectContent>
                             </Select>
+                            <ShowErrors errors={plantInfoErrors?.soilType || []} />
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="fertilizerType">Fertilizer Type</Label>
@@ -353,6 +394,7 @@ export default function Component() {
                                     <SelectItem value="Specialized Plant Fertilizer">Specialized Plant Fertilizer</SelectItem>
                                 </SelectContent>
                             </Select>
+                            <ShowErrors errors={plantInfoErrors?.fertilizerType || []} />
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="fertilizerSchedule">Fertilizer Schedule</Label>
@@ -367,11 +409,12 @@ export default function Component() {
                                     <SelectItem value="Weekly">Weekly</SelectItem>
                                     <SelectItem value="Bi-Weekly">Bi-Weekly</SelectItem>
                                     <SelectItem value="Monthly">Monthly</SelectItem>
-                                    <SelectItem value="Every 2–3 Months">Every 2–3 Months</SelectItem>
+                                    <SelectItem value="Every 2-3 Months">Every 2-3 Months</SelectItem>
                                     <SelectItem value="Seasonal">Seasonal</SelectItem>
                                     <SelectItem value="As Needed">As Needed</SelectItem>
                                 </SelectContent>
                             </Select>
+                            <ShowErrors errors={plantInfoErrors?.fertilizerSchedule || []} />
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="growthStage">Growth Stage</Label>
@@ -391,15 +434,24 @@ export default function Component() {
                                     <SelectItem value="Dormant">Dormant</SelectItem>
                                 </SelectContent>
                             </Select>
+                            <ShowErrors errors={plantInfoErrors?.growthStage || []} />
                         </div>
                     </div>
                 </div>
 
                 <div className="flex justify-end">
-                    <Button onClick={handleSubmit}>Save Plant Information</Button>
+                    <Button onClick={handleSubmit} disabled={isSaving}>
+                        {isSaving ? (
+                            <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Saving
+                            </>
+                        ) : (
+                            'Save Plant Information'
+                        )}
+                    </Button>
                 </div>
             </div>
         </div>
     )
 }
-

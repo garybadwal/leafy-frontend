@@ -1,6 +1,7 @@
 import { formidable } from "formidable";
 import fs from "fs";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { createAPIResponse } from "@/lib/config";
 
 export const config = {
     api: {
@@ -20,7 +21,7 @@ function fileToGenerativePart(path, mimeType) {
 
 const handler = async (req, res) => {
     if (req.method !== "POST") {
-        return res.status(405).json({ error: "Method not allowed" });
+        return res.status(405).json(createAPIResponse({ status: 405, message: "Method not allowed" }));
     }
 
     try {
@@ -31,7 +32,7 @@ const handler = async (req, res) => {
         const file = files.image?.[0];
 
         if (!file) {
-            return res.status(400).json({ error: "No image file provided" });
+            return res.status(400).json(createAPIResponse({ status: 400, message: "No image file provided" }));
         }
 
         // Initialize the Google Generative AI client
@@ -105,19 +106,14 @@ const handler = async (req, res) => {
         // Validate and parse the JSON response
         try {
             const jsonResponse = JSON.parse(cleanedResponse);
-            return res.status(200).json(jsonResponse);
+            return res.status(200).json(createAPIResponse({ status: 200, message: "Plant identified successfully", data: jsonResponse }));
         } catch (parseError) {
             console.error('Parse error:', parseError);
-            return res.status(500).json({
-                error: "Invalid response format from Gemini. Ensure the prompt restricts output to JSON.",
-                responseData,
-                cleanedResponse,
-                parseError: parseError.message
-            });
+            return res.status(500).json(createAPIResponse({ status: 500, message: "Invalid response format from Gemini. Ensure the prompt restricts output to JSON.", data: { responseData, cleanedResponse, parseError: parseError.message } }));
         }
     } catch (error) {
         console.error("Error processing request:", error);
-        return res.status(500).json({ error: "Error processing the request." });
+        return res.status(500).json(createAPIResponse({ status: 500, message: "Error processing the request." }));
     }
 };
 
