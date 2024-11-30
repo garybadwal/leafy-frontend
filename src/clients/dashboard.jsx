@@ -3,9 +3,7 @@
 import RecentPlantsTable from "@/components/custom/recent-plants-table";
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { navigate } from "@/hooks/navigate";
 import { AllPlantsListColumns } from "@/lib/config";
-import { Plus } from "lucide-react"
 import { useState, useEffect } from 'react';
 
 export default function Component() {
@@ -36,9 +34,9 @@ export default function Component() {
     }, [isLoading]);
 
     return (
-        <div className="grid gap-6 w-full h-full py-5">
+        <div className="flex flex-col gap-6 w-full h-full py-5">
             {/* Subscription Card */}
-            <Card>
+            <Card className="w-full">
                 <CardHeader>
                     <CardTitle>Free Plan</CardTitle>
                     <CardDescription>Welcome to PlantCare!</CardDescription>
@@ -54,8 +52,8 @@ export default function Component() {
             </Card>
 
             {/* Stats Grid */}
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                <Card>
+            <div className="flex flex-col lg:flex-row w-full h-fit gap-6">
+                <Card className="w-full lg:w-1/3 h-full">
                     <CardHeader>
                         <CardTitle className="text-sm font-medium">
                             Total Plants
@@ -71,7 +69,7 @@ export default function Component() {
                         </p>
                     </CardContent>
                 </Card>
-                <Card>
+                <Card className="w-full lg:w-1/3 h-full">
                     <CardHeader>
                         <CardTitle className="text-sm font-medium">
                             Monthly Appointments
@@ -87,7 +85,7 @@ export default function Component() {
                         </p>
                     </CardContent>
                 </Card>
-                <Card>
+                <Card className="w-full lg:w-1/3 h-full">
                     <CardHeader>
                         <CardTitle className="text-sm font-medium">
                             Plant Care Tip
@@ -102,7 +100,7 @@ export default function Component() {
             </div>
 
             {/* Recent Plants Table */}
-            <Card>
+            <Card className="w-full h-full">
                 <CardHeader>
                     <CardTitle>Recent Plants</CardTitle>
                     <CardDescription>Your 5 most recently added plants</CardDescription>

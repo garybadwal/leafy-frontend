@@ -27,6 +27,8 @@ import {
 } from "@/components/ui/table"
 import { DataTableFacetedFilter, statuses } from "@/components/custom/plants-table";
 import { ChevronDown, Loader2, Plus, X } from "lucide-react";
+import { TableResponsive } from "@/components/custom/table-responsive"
+import { navigate } from "@/hooks/navigate";
 
 
 export default function RecentPlantsTable({ columns, data, retriving }) {
@@ -119,7 +121,7 @@ export default function RecentPlantsTable({ columns, data, retriving }) {
                     </DropdownMenu>
                 </div>
             </div>
-            <div className="rounded-md border">
+            <TableResponsive className="rounded-md border">
                 <Table>
                     <TableHeader>
                         {table.getHeaderGroups().map((headerGroup) => (
@@ -188,7 +190,7 @@ export default function RecentPlantsTable({ columns, data, retriving }) {
                         )}
                     </TableBody>
                 </Table>
-            </div>
+            </TableResponsive>
         </div>
     )
 }
