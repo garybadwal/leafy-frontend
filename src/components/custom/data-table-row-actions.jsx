@@ -7,6 +7,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu"
+import { navigate } from "@/hooks/navigate"
 
 export function DataTableRowActions({
     row,
@@ -25,7 +26,7 @@ export function DataTableRowActions({
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-[160px]">
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={() => {navigate(`/garden/plants/${data.id}`)}}>
                     <Eye className="h-6 w-6" />
                     View
                 </DropdownMenuItem>

@@ -21,6 +21,7 @@ export const navigations = {
         {
             title: "DashBoard",
             url: "/dashboard",
+            urlRegex: /^\/dashboard$/,
             icon: LayoutPanelLeft,
             hidden: false,
             items: [],
@@ -28,19 +29,28 @@ export const navigations = {
         {
             title: "Garden",
             url: "#",
+            urlRegex: /^#$/,
             icon: Fence,
             hidden: false,
             items: [
                 {
                     title: "All Plants",
                     url: "/garden/plants",
+                    urlRegex: /^\/garden\/plants$/,
                     hidden: false,
                     items: [
                         {
                             title: "Add Plants",
                             url: "/garden/plants/add-plants",
+                            urlRegex: /^\/garden\/plants\/add-plants$/,
                             hidden: false,
                         },
+                        {
+                            title: "Plants Details",
+                            url: "#",
+                            urlRegex: /^\/garden\/plants\/\d+$/,
+                            hidden: false,
+                        }
                     ]
                 },
             ],
@@ -48,6 +58,7 @@ export const navigations = {
         {
             title: "Profile",
             url: "/profile",
+            urlRegex: /^\/profile$/,
             icon: UserRound,
             hidden: true,
             items: [],

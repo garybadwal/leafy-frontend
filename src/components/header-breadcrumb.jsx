@@ -19,7 +19,7 @@ function findBreadcrumbTrail(navItems, pathname) {
     const trail = [];
     const findPath = (items, currentPath) => {
         for (const item of items) {
-            if (item.url === currentPath) {
+            if (item.urlRegex instanceof RegExp && item.urlRegex.test(currentPath)) {
                 trail.push({ title: item.title, url: item.url });
                 return true;
             }
